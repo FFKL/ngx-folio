@@ -1,0 +1,40 @@
+:host {
+  display: inline-block;
+}
+
+.pagination {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+
+  &__default-button {
+    width: 20px;
+    height: 20px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    border: none;
+    background-color: #fff;
+
+    cursor: pointer;
+
+    &:disabled {
+      color: #fff;
+    }
+
+    &_page {
+      color: #000;
+
+      &:disabled {
+        color: #c50f0f;
+      }
+    }
+  }
+
+  &__direction {
+    background-color: #9e9ea4;
+  }
+}
