@@ -1,0 +1,28 @@
+{
+  "name": "ngx-folio",
+  "version": "1.0.0",
+  "peerDependencies": {
+    "@angular/common": "^10.1.6",
+    "@angular/core": "^10.1.6"
+  },
+  "dependencies": {
+    "tslib": "^2.0.0"
+  },
+  "keywords": [
+    "angular",
+    "angular 2",
+    "ngx-folio"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "bugs": {
+    "url": "https://github.com/FFKL/ngx-folio/issue"
+  },
+  "homepage": "https://github.com/FFKL/ngx-folio#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/FFKL/ngx-folio"
+  }
+}
