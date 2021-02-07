@@ -37,6 +37,115 @@
           }
         }
       }
+    },
+    "folio-demo": {
+      "projectType": "application",
+      "schematics": {
+        "@schematics/angular:component": {
+          "style": "scss"
+        }
+      },
+      "root": "projects/folio-demo",
+      "sourceRoot": "projects/folio-demo/src",
+      "prefix": "app",
+      "architect": {
+        "build": {
+          "builder": "@angular-devkit/build-angular:browser",
+          "options": {
+            "outputPath": "dist/folio-demo",
+            "index": "projects/folio-demo/src/index.html",
+            "main": "projects/folio-demo/src/main.ts",
+            "polyfills": "projects/folio-demo/src/polyfills.ts",
+            "tsConfig": "projects/folio-demo/tsconfig.app.json",
+            "aot": true,
+            "assets": ["projects/folio-demo/src/favicon.ico", "projects/folio-demo/src/assets"],
+            "styles": ["projects/folio-demo/src/styles.scss"],
+            "scripts": []
+          },
+          "configurations": {
+            "production": {
+              "fileReplacements": [
+                {
+                  "replace": "projects/folio-demo/src/environments/environment.ts",
+                  "with": "projects/folio-demo/src/environments/environment.prod.ts"
+                }
+              ],
+              "optimization": true,
+              "outputHashing": "all",
+              "sourceMap": false,
+              "extractCss": true,
+              "namedChunks": false,
+              "extractLicenses": true,
+              "vendorChunk": false,
+              "buildOptimizer": true,
+              "budgets": [
+                {
+                  "type": "initial",
+                  "maximumWarning": "2mb",
+                  "maximumError": "5mb"
+                },
+                {
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb",
+                  "maximumError": "10kb"
+                }
+              ]
+            }
+          }
+        },
+        "serve": {
+          "builder": "@angular-devkit/build-angular:dev-server",
+          "options": {
+            "browserTarget": "folio-demo:build"
+          },
+          "configurations": {
+            "production": {
+              "browserTarget": "folio-demo:build:production"
+            }
+          }
+        },
+        "extract-i18n": {
+          "builder": "@angular-devkit/build-angular:extract-i18n",
+          "options": {
+            "browserTarget": "folio-demo:build"
+          }
+        },
+        "test": {
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "main": "projects/folio-demo/src/test.ts",
+            "polyfills": "projects/folio-demo/src/polyfills.ts",
+            "tsConfig": "projects/folio-demo/tsconfig.spec.json",
+            "karmaConfig": "projects/folio-demo/karma.conf.js",
+            "assets": ["projects/folio-demo/src/favicon.ico", "projects/folio-demo/src/assets"],
+            "styles": ["projects/folio-demo/src/styles.scss"],
+            "scripts": []
+          }
+        },
+        "lint": {
+          "builder": "@angular-devkit/build-angular:tslint",
+          "options": {
+            "tsConfig": [
+              "projects/folio-demo/tsconfig.app.json",
+              "projects/folio-demo/tsconfig.spec.json",
+              "projects/folio-demo/e2e/tsconfig.json"
+            ],
+            "exclude": ["**/node_modules/**"]
+          }
+        },
+        "e2e": {
+          "builder": "@angular-devkit/build-angular:protractor",
+          "options": {
+            "protractorConfig": "projects/folio-demo/e2e/protractor.conf.js",
+            "devServerTarget": "folio-demo:serve"
+          },
+          "configurations": {
+            "production": {
+              "devServerTarget": "folio-demo:serve:production"
+            }
+          }
+        }
+      }
     }
   },
   "defaultProject": "ngx-folio"
