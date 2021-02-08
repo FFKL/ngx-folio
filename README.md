@@ -61,7 +61,13 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
 <!-- prettier-ignore-start -->
 <!-- markdownlint-disable -->
-<!-- markdownlint-enable -->
+<table>
+  <tr>
+    <td align="center"><a href="https://github.com/FFKL"><img src="https://avatars.githubusercontent.com/u/11336491?v=4?s=100" width="100px;" alt=""/><br /><sub><b>Dmitrii Korostelev</b></sub></a><br /><a href="https://github.com/FFKL/ngx-folio/commits?author=FFKL" title="Code">💻</a> <a href="#content-FFKL" title="Content">🖋</a> <a href="https://github.com/FFKL/ngx-folio/commits?author=FFKL" title="Documentation">📖</a> <a href="#maintenance-FFKL" title="Maintenance">🚧</a> <a href="https://github.com/FFKL/ngx-folio/commits?author=FFKL" title="Tests">⚠️</a></td>
+  </tr>
+</table>
+
+<!-- markdownlint-restore -->
 <!-- prettier-ignore-end -->
 
 <!-- ALL-CONTRIBUTORS-LIST:END -->
