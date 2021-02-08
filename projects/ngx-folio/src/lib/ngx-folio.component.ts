@@ -25,6 +25,7 @@ export class ButtonEllipsisDirective {}
 @Component({
   selector: 'ngx-folio',
   styleUrls: ['./ngx-folio.component.scss'],
+  providers: [ValidatorService],
   template: `
     <ul class="pagination">
       <li class="pagination__item">
@@ -85,7 +86,6 @@ export class ButtonEllipsisDirective {}
       <button class="pagination__default-button" disabled>...</button>
     </ng-template>
   `,
-  providers: [ValidatorService],
 })
 export class NgxFolioComponent implements OnChanges {
   @Input() page!: number;
@@ -144,13 +144,13 @@ export class NgxFolioComponent implements OnChanges {
   }
 
   private validateInputs(): void {
-    const { errors } = this.validator.validate(this, {
-      page: { type: 'number', integer: true, min: 1 },
-      pageSize: { type: 'number', integer: true, min: 1 },
-      collectionSize: { type: 'number', integer: true, min: 0 },
-      cursorSegmentMax: { type: 'number', integer: true, min: 1 },
-      startSegmentMax: { type: 'number', integer: true, min: 1 },
-      endSegmentMax: { type: 'number', integer: true, min: 1 },
+    const { errors } = this.validator.validate(this as {}, {
+      page: { type: 'integer', min: 1 },
+      pageSize: { type: 'integer', min: 1 },
+      collectionSize: { type: 'integer', min: 0 },
+      cursorSegmentMax: { type: 'integer', min: 1 },
+      startSegmentMax: { type: 'integer', min: 1 },
+      endSegmentMax: { type: 'integer', min: 1 },
     });
 
     if (errors.length) {
