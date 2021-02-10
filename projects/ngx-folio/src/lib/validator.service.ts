@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 
-interface ValidationError {
+export interface ValidatorError {
   field: string;
   message: string;
 }
 
 interface ValidationResult {
   success: boolean;
-  errors: ValidationError[];
+  errors: ValidatorError[];
 }
 
 interface IntegerRule {
@@ -51,7 +51,7 @@ export class ValidatorService {
           typeof target[fieldName] === 'number' && rule && this.validateByRule(fieldName, target[fieldName], rule)
       )
       .filter((result): result is ValidationResult => result !== undefined)
-      .reduce<ValidationError[]>((acc, curr) => [...acc, ...curr.errors], []);
+      .reduce<ValidatorError[]>((acc, curr) => [...acc, ...curr.errors], []);
 
     return { errors, success: errors.length === 0 };
   }

@@ -3,10 +3,8 @@ import { TemplateRef } from '@angular/core';
 import { Output } from '@angular/core';
 import { Input } from '@angular/core';
 import { Component, EventEmitter, OnChanges } from '@angular/core';
+import { last, first, assert, checkValidationErrors } from './util';
 import { ValidatorService } from './validator.service';
-
-// TODO: add necessary rules to tsconfig or fix error cases
-// tslint:disable:no-any directive-selector component-selector
 
 type PagesLayout = (number | '...')[];
 
@@ -153,6 +151,8 @@ export class NgxFolioComponent implements OnChanges {
       endSegmentMax: { type: 'integer', min: 1 },
     });
 
+    checkValidationErrors(errors, 'Invalid NgxFolioComponent inputs');
+
     if (errors.length) {
       throw new Error(`Inputs validation error! \n${errors.map((error) => error.message).join('\n')}`);
     }
@@ -189,21 +189,19 @@ export class NgxFolioComponent implements OnChanges {
     return result;
   }
 
-  private isCoupled(arr1: any[], arr2: any[]): boolean {
-    if (!arr1.length || !arr2.length) {
+  private isCoupled(layout: PagesLayout, segment: number[]): boolean {
+    if (!layout.length || !segment.length) {
       return false;
     }
+    const lastLayoutItem = last(layout);
+    const firstSegmentItem = first(segment);
 
-    return this.last(arr1) === this.first(arr2) - 1;
+    assert(lastLayoutItem !== undefined, 'Pages layout should have at least one element');
+    assert(firstSegmentItem !== undefined, 'Segment should have at least one element');
+
+    return lastLayoutItem === (firstSegmentItem - 1);
   }
 
-  private last<T>(arr: T[]): T {
-    return arr[arr.length - 1];
-  }
-
-  private first<T>(arr: T[]): T {
-    return arr[0];
-  }
 
   private createCursorSegment(fullCursorSegment: number[]): number[] {
     const activePageIdx = fullCursorSegment.indexOf(this.page);
