@@ -46,9 +46,13 @@ export class ValidatorService {
 
   validate<T extends { [key: string]: unknown }>(target: T, schema: ValidationSchema<T>): ValidationResult {
     const errors = Object.entries(schema)
-      .map(
-        ([fieldName, rule]) =>
-          typeof target[fieldName] === 'number' && rule && this.validateByRule(fieldName, target[fieldName], rule)
+      .map(([fieldName, rule]) => {
+          if (typeof target[fieldName] === 'number' && rule) {
+            return this.validateByRule(fieldName, target[fieldName], rule);
+          }
+
+          return undefined;
+        }
       )
       .filter((result): result is ValidationResult => result !== undefined)
       .reduce<ValidatorError[]>((acc, curr) => [...acc, ...curr.errors], []);
