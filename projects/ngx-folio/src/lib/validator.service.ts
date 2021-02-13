@@ -17,9 +17,15 @@ interface IntegerRule {
 
 type ValidationRule = IntegerRule;
 
+type SchemaTuple = [fieldName: string, rule: ValidationRule];
+
 type ValidationSchema<T> = { [key in keyof T]?: ValidationRule };
 
-type ValidateFunction = (fieldName: string, value: unknown, rule: ValidationRule) => ValidationResult;
+type ValidateFunction<T extends ValidationRule> = (fieldName: string, value: unknown, rule: T) => ValidationResult;
+
+interface Validators {
+  integer: ValidateFunction<IntegerRule>;
+}
 
 function validateInteger(fieldName: string, value: unknown, { min }: IntegerRule): ValidationResult {
   const isInteger = (val: unknown): val is number => typeof val === 'number' && Number.isInteger(val);
@@ -40,21 +46,14 @@ function validateInteger(fieldName: string, value: unknown, { min }: IntegerRule
 
 @Injectable({ providedIn: 'root' })
 export class ValidatorService {
-  private readonly validators: { [type: string]: ValidateFunction } = {
-    integer: validateInteger,
+  private readonly validators: Validators = {
+    integer: validateInteger
   };
 
   validate<T extends { [key: string]: unknown }>(target: T, schema: ValidationSchema<T>): ValidationResult {
-    const errors = Object.entries(schema)
-      .map(([fieldName, rule]) => {
-          if (typeof target[fieldName] === 'number' && rule) {
-            return this.validateByRule(fieldName, target[fieldName], rule);
-          }
-
-          return undefined;
-        }
-      )
-      .filter((result): result is ValidationResult => result !== undefined)
+    const errors = Object.entries<ValidationRule | undefined>(schema)
+      .filter((entity): entity is SchemaTuple => Boolean(typeof target[entity[0]] === 'number' && entity[1]))
+      .map(([fieldName, rule]) => this.validateByRule(fieldName, target[fieldName], rule))
       .reduce<ValidatorError[]>((acc, curr) => [...acc, ...curr.errors], []);
 
     return { errors, success: errors.length === 0 };
@@ -66,7 +65,8 @@ export class ValidatorService {
     return validatorFn(fieldName, value, rule);
   }
 
-  private pickValidator({ type }: ValidationRule): ValidateFunction {
+  // tslint:disable-next-line:no-any
+  private pickValidator({ type }: ValidationRule): ValidateFunction<any> {
     return this.validators[type];
   }
 }
