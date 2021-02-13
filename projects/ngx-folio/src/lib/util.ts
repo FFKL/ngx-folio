@@ -21,13 +21,13 @@ export function checkValidationErrors(errors: ValidatorError[], message: string)
   }
 }
 
-class CustomError extends Error {
+export class CustomError extends Error {
   constructor(message: string) {
     super(message);
     this.name = this.constructor.name;
   }
 }
 
-class AssertionError extends CustomError {}
+export class AssertionError extends CustomError {}
 
-class ValidationError extends CustomError {}
+export class ValidationError extends CustomError {}
