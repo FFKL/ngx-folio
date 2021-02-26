@@ -3,7 +3,7 @@ import { ELLIPSIS_MARKER } from './constants';
 import { PagesLayout } from './types';
 import { assert, first, last } from './util';
 
-interface FolioLayoutBuilderOptions {
+export interface FolioLayoutBuilderOptions {
   maxPage: number;
   startSegmentMax: number;
   endSegmentMax: number;
