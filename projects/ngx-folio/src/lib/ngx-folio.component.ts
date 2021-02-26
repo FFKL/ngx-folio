@@ -1,12 +1,19 @@
-import { ContentChild, Directive, SimpleChanges } from '@angular/core';
-import { TemplateRef } from '@angular/core';
-import { Output } from '@angular/core';
-import { Input } from '@angular/core';
-import { Component, EventEmitter, OnChanges } from '@angular/core';
-import { last, first, assert, checkValidationErrors } from './util';
+import {
+  Component,
+  ContentChild,
+  Directive,
+  EventEmitter,
+  Input,
+  OnChanges,
+  Output,
+  SimpleChanges,
+  TemplateRef,
+} from '@angular/core';
+import { PagesLayout } from './types';
+import { checkValidationErrors } from './util';
 import { ValidatorService } from './validator.service';
-
-type PagesLayout = (number | '...')[];
+import { ELLIPSIS_MARKER } from './constants';
+import { FolioLayoutBuilderService } from './folio-layout-builder.service';
 
 @Directive({ selector: '[button-prev]' })
 export class ButtonPrevDirective {}
@@ -103,9 +110,12 @@ export class NgxFolioComponent implements OnChanges {
 
   pages: PagesLayout = [];
 
-  readonly ELLIPSIS_MARKER = '...' as const;
+  readonly ELLIPSIS_MARKER = ELLIPSIS_MARKER;
 
-  constructor(private readonly validator: ValidatorService) {}
+  constructor(
+    private readonly validator: ValidatorService,
+    private readonly layoutBuilder: FolioLayoutBuilderService
+  ) {}
 
   ngOnChanges(changes: SimpleChanges): void {
     this.validateInputs();
@@ -159,86 +169,12 @@ export class NgxFolioComponent implements OnChanges {
   }
 
   private render(): void {
-    this.pages = this.createLayout();
-  }
-
-  private createLayout(): PagesLayout {
-    const lastPage = this.getMaxPage();
-    const paginationLength = this.startSegmentMax + this.endSegmentMax + this.cursorSegmentMax;
-    if (paginationLength >= this.getMaxPage()) {
-      return this.createPagesRange(1, lastPage);
-    }
-
-    const startSegment = this.createPagesRange(1, this.startSegmentMax);
-    const leftEndBoundary = lastPage - this.endSegmentMax + 1;
-    const endSegment = this.createPagesRange(leftEndBoundary, lastPage);
-    const fullCursorSegment = this.createPagesRange(this.startSegmentMax + 1, leftEndBoundary - 1);
-    const cursorSegment = this.createCursorSegment(fullCursorSegment);
-
-    const result: PagesLayout = [];
-    result.push(...startSegment);
-    if (!this.isCoupled(result, cursorSegment)) {
-      result.push(this.ELLIPSIS_MARKER);
-    }
-    result.push(...cursorSegment);
-    if (!this.isCoupled(result, endSegment)) {
-      result.push(this.ELLIPSIS_MARKER);
-    }
-    result.push(...endSegment);
-
-    return result;
-  }
-
-  private isCoupled(layout: PagesLayout, segment: number[]): boolean {
-    if (!layout.length || !segment.length) {
-      return false;
-    }
-    const lastLayoutItem = last(layout);
-    const firstSegmentItem = first(segment);
-
-    assert(lastLayoutItem !== undefined, 'Pages layout should have at least one element');
-    assert(firstSegmentItem !== undefined, 'Segment should have at least one element');
-
-    return lastLayoutItem === (firstSegmentItem - 1);
-  }
-
-
-  private createCursorSegment(fullCursorSegment: number[]): number[] {
-    const activePageIdx = fullCursorSegment.indexOf(this.page);
-    const splitIdx = activePageIdx === -1 ? Math.ceil((fullCursorSegment.length - 1) / 2) : activePageIdx;
-    const referencePage = fullCursorSegment[splitIdx];
-    const beforeActive = fullCursorSegment.slice(0, splitIdx);
-    const afterActive = fullCursorSegment.slice(splitIdx + 1, Infinity);
-
-    return this.populateCursorSegment(referencePage, beforeActive, afterActive);
-  }
-
-  private populateCursorSegment(referencePage: number, before: number[], after: number[]): number[] {
-    const result = [referencePage];
-
-    let i = result.length;
-    while ((before.length || after.length) && i < this.cursorSegmentMax) {
-      if (before.length) {
-        result.unshift(before.pop() as number);
-        i += 1;
-      }
-      if (i < this.cursorSegmentMax && after.length) {
-        result.push(after.shift() as number);
-        i += 1;
-      }
-    }
-
-    return result;
-  }
-
-  private createPagesRange(from: number, to: number): number[] {
-    const segment = [];
-    for (let i = from; i <= to; i += 1) {
-      if (i > 0) {
-        segment.push(i);
-      }
-    }
-
-    return segment;
+    this.pages = this.layoutBuilder.createLayout({
+      cursorSegmentMax: this.cursorSegmentMax,
+      currentPage: this.page,
+      endSegmentMax: this.endSegmentMax,
+      startSegmentMax: this.startSegmentMax,
+      maxPage: this.getMaxPage(),
+    });
   }
 }
