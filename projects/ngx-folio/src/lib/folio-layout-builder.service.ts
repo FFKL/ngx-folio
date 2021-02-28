@@ -25,12 +25,13 @@ export class FolioLayoutBuilderService {
     if (paginationLength >= maxPage) {
       return this.createPagesRange(1, lastPage);
     }
+    const oneHiddenPage = maxPage - paginationLength === 1;
 
     const startSegment = this.createPagesRange(1, startSegmentMax);
     const leftEndBoundary = lastPage - endSegmentMax + 1;
     const endSegment = this.createPagesRange(leftEndBoundary, lastPage);
     const fullCursorSegment = this.createPagesRange(startSegmentMax + 1, leftEndBoundary - 1);
-    const cursorSegment = this.createCursorSegment(fullCursorSegment, currentPage, cursorSegmentMax);
+    const cursorSegment = this.createCursorSegment(fullCursorSegment, currentPage, cursorSegmentMax, oneHiddenPage);
 
     const result: PagesLayout = [];
     result.push(...startSegment);
@@ -59,14 +60,31 @@ export class FolioLayoutBuilderService {
     return lastLayoutItem === firstSegmentItem - 1;
   }
 
-  private createCursorSegment(fullCursorSegment: number[], currentPage: number, cursorSegmentMax: number): number[] {
-    const activePageIdx = fullCursorSegment.indexOf(currentPage);
-    const splitIdx = activePageIdx === -1 ? Math.ceil((fullCursorSegment.length - 1) / 2) : activePageIdx;
+  private createCursorSegment(
+    fullCursorSegment: number[],
+    currentPage: number,
+    cursorSegmentMax: number,
+    oneHiddenPage = false
+  ): number[] {
+    const splitIdx = this.defineSplitIndex(fullCursorSegment, currentPage, oneHiddenPage);
     const referencePage = fullCursorSegment[splitIdx];
     const beforeActive = fullCursorSegment.slice(0, splitIdx);
     const afterActive = fullCursorSegment.slice(splitIdx + 1, Infinity);
 
     return this.populateCursorSegment(referencePage, beforeActive, afterActive, cursorSegmentMax);
+  }
+
+  private defineSplitIndex(fullCursorSegment: number[], currentPage: number, oneHiddenPage: boolean): number {
+    const activePageIdx = fullCursorSegment.indexOf(currentPage);
+    if (oneHiddenPage && activePageIdx === -1) {
+      if (currentPage < fullCursorSegment[0]) {
+        return 0;
+      } else if (currentPage > fullCursorSegment[fullCursorSegment.length - 1]) {
+        return fullCursorSegment.length - 1;
+      }
+    }
+
+    return activePageIdx === -1 ? Math.ceil((fullCursorSegment.length - 1) / 2) : activePageIdx;
   }
 
   private populateCursorSegment(
