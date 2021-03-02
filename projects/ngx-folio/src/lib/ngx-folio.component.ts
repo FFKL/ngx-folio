@@ -170,11 +170,13 @@ export class NgxFolioComponent implements OnChanges {
 
   private render(): void {
     this.pages = this.layoutBuilder.createLayout({
-      cursorSegmentMax: this.cursorSegmentMax,
       currentPage: this.page,
-      endSegmentMax: this.endSegmentMax,
-      startSegmentMax: this.startSegmentMax,
-      maxPage: this.getMaxPage(),
+      pagesAmount: this.getMaxPage(),
+      segmentsSizes: {
+        start: this.startSegmentMax,
+        end: this.endSegmentMax,
+        cursor: this.cursorSegmentMax,
+      },
     });
   }
 }

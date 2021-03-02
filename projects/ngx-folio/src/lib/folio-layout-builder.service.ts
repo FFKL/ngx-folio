@@ -4,34 +4,42 @@ import { PagesLayout } from './types';
 import { assert, first, last } from './util';
 
 export interface FolioLayoutBuilderOptions {
-  maxPage: number;
-  startSegmentMax: number;
-  endSegmentMax: number;
-  cursorSegmentMax: number;
+  pagesAmount: number;
   currentPage: number;
+  segmentsSizes: SegmentsSizes;
 }
 
-@Injectable({ providedIn: 'root' })
-export class FolioLayoutBuilderService {
-  createLayout({
-    maxPage,
-    startSegmentMax,
-    endSegmentMax,
-    currentPage,
-    cursorSegmentMax,
-  }: FolioLayoutBuilderOptions): PagesLayout {
-    const lastPage = maxPage;
-    const paginationLength = startSegmentMax + endSegmentMax + cursorSegmentMax;
-    if (paginationLength >= maxPage) {
+export interface SegmentsSizes {
+  start: number;
+  cursor: number;
+  end: number;
+}
+
+class BuildTask {
+  constructor(
+    private readonly currentPage: number,
+    private readonly pagesAmount: number,
+    private readonly segmentsSizes: Readonly<SegmentsSizes>
+  ) {}
+
+  build(): PagesLayout {
+    const lastPage = this.pagesAmount;
+    const paginationLength = this.segmentsSizes.start + this.segmentsSizes.end + this.segmentsSizes.cursor;
+    if (paginationLength >= this.pagesAmount) {
       return this.createPagesRange(1, lastPage);
     }
-    const oneHiddenPage = maxPage - paginationLength === 1;
+    const oneHiddenPage = this.pagesAmount - paginationLength === 1;
 
-    const startSegment = this.createPagesRange(1, startSegmentMax);
-    const leftEndBoundary = lastPage - endSegmentMax + 1;
+    const startSegment = this.createPagesRange(1, this.segmentsSizes.start);
+    const leftEndBoundary = lastPage - this.segmentsSizes.end + 1;
     const endSegment = this.createPagesRange(leftEndBoundary, lastPage);
-    const fullCursorSegment = this.createPagesRange(startSegmentMax + 1, leftEndBoundary - 1);
-    const cursorSegment = this.createCursorSegment(fullCursorSegment, currentPage, cursorSegmentMax, oneHiddenPage);
+    const fullCursorSegment = this.createPagesRange(this.segmentsSizes.start + 1, leftEndBoundary - 1);
+    const cursorSegment = this.createCursorSegment(
+      fullCursorSegment,
+      this.currentPage,
+      this.segmentsSizes.cursor,
+      oneHiddenPage
+    );
 
     const result: PagesLayout = [];
     result.push(...startSegment);
@@ -125,5 +133,14 @@ export class FolioLayoutBuilderService {
     }
 
     return segment;
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class FolioLayoutBuilderService {
+  createLayout({ currentPage, pagesAmount, segmentsSizes }: FolioLayoutBuilderOptions): PagesLayout {
+    const task = new BuildTask(currentPage, pagesAmount, segmentsSizes);
+
+    return task.build();
   }
 }
