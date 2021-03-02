@@ -123,8 +123,7 @@ describe('FolioLayoutBuilderService', () => {
 
       const layout = builder.createLayout(options);
 
-      // TODO: rework to [1, 2, '...', 4, 5, 6, '...', 9, 10]
-      expect(layout).toEqual([1, 2, '...', 5, 6, 7, '...', 9, 10]);
+      expect(layout).toEqual([1, 2, '...', 4, 5, 6, '...', 9, 10]);
     });
 
     it('should build cursor segment in the middle when maxPage is odd and cursorSegment is odd', () => {

@@ -66,7 +66,7 @@ export class FolioLayoutBuilderService {
     cursorSegmentMax: number,
     oneHiddenPage = false
   ): number[] {
-    const splitIdx = this.defineSplitIndex(fullCursorSegment, currentPage, oneHiddenPage);
+    const splitIdx = this.defineSplitIndex(fullCursorSegment, currentPage, cursorSegmentMax, oneHiddenPage);
     const referencePage = fullCursorSegment[splitIdx];
     const beforeActive = fullCursorSegment.slice(0, splitIdx);
     const afterActive = fullCursorSegment.slice(splitIdx + 1, Infinity);
@@ -74,7 +74,12 @@ export class FolioLayoutBuilderService {
     return this.populateCursorSegment(referencePage, beforeActive, afterActive, cursorSegmentMax);
   }
 
-  private defineSplitIndex(fullCursorSegment: number[], currentPage: number, oneHiddenPage: boolean): number {
+  private defineSplitIndex(
+    fullCursorSegment: number[],
+    currentPage: number,
+    cursorSegmentMax: number,
+    oneHiddenPage: boolean
+  ): number {
     const activePageIdx = fullCursorSegment.indexOf(currentPage);
     if (oneHiddenPage && activePageIdx === -1) {
       if (currentPage < fullCursorSegment[0]) {
@@ -83,8 +88,9 @@ export class FolioLayoutBuilderService {
         return fullCursorSegment.length - 1;
       }
     }
+    const round = cursorSegmentMax % 2 ? Math.floor : Math.ceil;
 
-    return activePageIdx === -1 ? Math.ceil((fullCursorSegment.length - 1) / 2) : activePageIdx;
+    return activePageIdx === -1 ? round((fullCursorSegment.length - 1) / 2) : activePageIdx;
   }
 
   private populateCursorSegment(
