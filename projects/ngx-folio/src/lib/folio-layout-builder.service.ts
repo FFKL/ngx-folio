@@ -34,12 +34,7 @@ class BuildTask {
     const leftEndBoundary = lastPage - this.segmentsSizes.end + 1;
     const endSegment = this.createPagesRange(leftEndBoundary, lastPage);
     const fullCursorSegment = this.createPagesRange(this.segmentsSizes.start + 1, leftEndBoundary - 1);
-    const cursorSegment = this.createCursorSegment(
-      fullCursorSegment,
-      this.currentPage,
-      this.segmentsSizes.cursor,
-      oneHiddenPage
-    );
+    const cursorSegment = this.createCursorSegment(fullCursorSegment, oneHiddenPage);
 
     const result: PagesLayout = [];
     result.push(...startSegment);
@@ -68,54 +63,39 @@ class BuildTask {
     return lastLayoutItem === firstSegmentItem - 1;
   }
 
-  private createCursorSegment(
-    fullCursorSegment: number[],
-    currentPage: number,
-    cursorSegmentMax: number,
-    oneHiddenPage = false
-  ): number[] {
-    const splitIdx = this.defineSplitIndex(fullCursorSegment, currentPage, cursorSegmentMax, oneHiddenPage);
+  private createCursorSegment(fullCursorSegment: number[], oneHiddenPage = false): number[] {
+    const splitIdx = this.defineSplitIndex(fullCursorSegment, oneHiddenPage);
     const referencePage = fullCursorSegment[splitIdx];
     const beforeActive = fullCursorSegment.slice(0, splitIdx);
     const afterActive = fullCursorSegment.slice(splitIdx + 1, Infinity);
 
-    return this.populateCursorSegment(referencePage, beforeActive, afterActive, cursorSegmentMax);
+    return this.populateCursorSegment(referencePage, beforeActive, afterActive);
   }
 
-  private defineSplitIndex(
-    fullCursorSegment: number[],
-    currentPage: number,
-    cursorSegmentMax: number,
-    oneHiddenPage: boolean
-  ): number {
-    const activePageIdx = fullCursorSegment.indexOf(currentPage);
+  private defineSplitIndex(fullCursorSegment: number[], oneHiddenPage: boolean): number {
+    const activePageIdx = fullCursorSegment.indexOf(this.currentPage);
     if (oneHiddenPage && activePageIdx === -1) {
-      if (currentPage < fullCursorSegment[0]) {
+      if (this.currentPage < fullCursorSegment[0]) {
         return 0;
-      } else if (currentPage > fullCursorSegment[fullCursorSegment.length - 1]) {
+      } else if (this.currentPage > fullCursorSegment[fullCursorSegment.length - 1]) {
         return fullCursorSegment.length - 1;
       }
     }
-    const round = cursorSegmentMax % 2 ? Math.floor : Math.ceil;
+    const round = this.segmentsSizes.cursor % 2 ? Math.floor : Math.ceil;
 
     return activePageIdx === -1 ? round((fullCursorSegment.length - 1) / 2) : activePageIdx;
   }
 
-  private populateCursorSegment(
-    referencePage: number,
-    before: number[],
-    after: number[],
-    cursorSegmentMax: number
-  ): number[] {
+  private populateCursorSegment(referencePage: number, before: number[], after: number[]): number[] {
     const result = [referencePage];
 
     let i = result.length;
-    while ((before.length || after.length) && i < cursorSegmentMax) {
+    while ((before.length || after.length) && i < this.segmentsSizes.cursor) {
       if (before.length) {
         result.unshift(before.pop() as number);
         i += 1;
       }
-      if (i < cursorSegmentMax && after.length) {
+      if (i < this.segmentsSizes.cursor && after.length) {
         result.push(after.shift() as number);
         i += 1;
       }
