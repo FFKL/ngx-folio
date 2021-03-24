@@ -8,6 +8,15 @@ export function first<T>(arr: T[]): T | undefined {
   return arr[0];
 }
 
+export function numbersRange(from: number, to: number): number[] {
+  const range = [];
+  for (let i = from; i <= to; i += 1) {
+    range.push(i);
+  }
+
+  return range;
+}
+
 export function assert(comparison: boolean, message: string): asserts comparison {
   if (!comparison) {
     throw new AssertionError(message);

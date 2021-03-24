@@ -1,3 +1,3 @@
-import { Ellipsis } from './types';
+import { SegmentsDelimiter } from './types';
 
-export const ELLIPSIS_MARKER: Ellipsis = '...';
+export const SEGMENTS_DELIMITER: SegmentsDelimiter = '...';

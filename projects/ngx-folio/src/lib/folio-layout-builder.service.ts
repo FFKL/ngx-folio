@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
-import { ELLIPSIS_MARKER } from './constants';
-import { PagesLayout } from './types';
-import { assert, first, last } from './util';
+import { SEGMENTS_DELIMITER } from './constants';
+import { SegmentsDelimiter, PagesLayout } from './types';
+import { assert, first, last, numbersRange } from './util';
 
 export interface FolioLayoutBuilderOptions {
   pagesAmount: number;
@@ -23,34 +23,44 @@ class BuildTask {
   ) {}
 
   build(): PagesLayout {
-    const lastPage = this.pagesAmount;
-    const paginationLength = this.segmentsSizes.start + this.segmentsSizes.end + this.segmentsSizes.cursor;
-    if (paginationLength >= this.pagesAmount) {
-      return this.createPagesRange(1, lastPage);
+    if (this.getHiddenPagesAmount() === 0) {
+      return numbersRange(1, this.pagesAmount);
     }
-    const oneHiddenPage = this.pagesAmount - paginationLength === 1;
 
-    const startSegment = this.createPagesRange(1, this.segmentsSizes.start);
-    const leftEndBoundary = lastPage - this.segmentsSizes.end + 1;
-    const endSegment = this.createPagesRange(leftEndBoundary, lastPage);
-    const fullCursorSegment = this.createPagesRange(this.segmentsSizes.start + 1, leftEndBoundary - 1);
-    const cursorSegment = this.createCursorSegment(fullCursorSegment, oneHiddenPage);
+    const startSegment = numbersRange(1, this.segmentsSizes.start);
+    const leftEndBoundary = this.pagesAmount - this.segmentsSizes.end + 1;
+    const endSegment = numbersRange(leftEndBoundary, this.pagesAmount);
+    const fullCursorSegment = numbersRange(this.segmentsSizes.start + 1, leftEndBoundary - 1);
+    const cursorSegment = this.createCursorSegment(fullCursorSegment);
 
-    const result: PagesLayout = [];
-    result.push(...startSegment);
-    if (!this.isCoupled(result, cursorSegment)) {
-      result.push(ELLIPSIS_MARKER);
-    }
-    result.push(...cursorSegment);
-    if (!this.isCoupled(result, endSegment)) {
-      result.push(ELLIPSIS_MARKER);
-    }
-    result.push(...endSegment);
-
-    return result;
+    return this.glueSegments(startSegment, cursorSegment, endSegment);
   }
 
-  private isCoupled(layout: PagesLayout, segment: number[]): boolean {
+  private glueSegments(start: number[], cursor: number[], end: number[]): PagesLayout {
+    return [
+      ...start,
+      ...this.delimiterSegment(start, cursor),
+      ...cursor,
+      ...this.delimiterSegment(cursor, end),
+      ...end,
+    ];
+  }
+
+  private delimiterSegment(a: number[], b: number[]): [SegmentsDelimiter] | [] {
+    return this.isCoupled(a, b) ? [] : [SEGMENTS_DELIMITER];
+  }
+
+  private getVisiblePagesAmount(): number {
+    return this.segmentsSizes.start + this.segmentsSizes.end + this.segmentsSizes.cursor;
+  }
+
+  private getHiddenPagesAmount(): number {
+    const diff = this.pagesAmount - this.getVisiblePagesAmount();
+
+    return diff >= 0 ? diff : 0;
+  }
+
+  private isCoupled(layout: number[], segment: number[]): boolean {
     if (!layout.length || !segment.length) {
       return false;
     }
@@ -63,8 +73,8 @@ class BuildTask {
     return lastLayoutItem === firstSegmentItem - 1;
   }
 
-  private createCursorSegment(fullCursorSegment: number[], oneHiddenPage = false): number[] {
-    const splitIdx = this.defineSplitIndex(fullCursorSegment, oneHiddenPage);
+  private createCursorSegment(fullCursorSegment: number[]): number[] {
+    const splitIdx = this.defineSplitIndex(fullCursorSegment);
     const referencePage = fullCursorSegment[splitIdx];
     const beforeActive = fullCursorSegment.slice(0, splitIdx);
     const afterActive = fullCursorSegment.slice(splitIdx + 1, Infinity);
@@ -72,9 +82,9 @@ class BuildTask {
     return this.populateCursorSegment(referencePage, beforeActive, afterActive);
   }
 
-  private defineSplitIndex(fullCursorSegment: number[], oneHiddenPage: boolean): number {
+  private defineSplitIndex(fullCursorSegment: number[]): number {
     const activePageIdx = fullCursorSegment.indexOf(this.currentPage);
-    if (oneHiddenPage && activePageIdx === -1) {
+    if (this.getHiddenPagesAmount() === 1 && activePageIdx === -1) {
       if (this.currentPage < fullCursorSegment[0]) {
         return 0;
       } else if (this.currentPage > fullCursorSegment[fullCursorSegment.length - 1]) {
@@ -102,17 +112,6 @@ class BuildTask {
     }
 
     return result;
-  }
-
-  private createPagesRange(from: number, to: number): number[] {
-    const segment = [];
-    for (let i = from; i <= to; i += 1) {
-      if (i > 0) {
-        segment.push(i);
-      }
-    }
-
-    return segment;
   }
 }
 

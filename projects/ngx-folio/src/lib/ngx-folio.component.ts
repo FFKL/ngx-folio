@@ -12,7 +12,7 @@ import {
 import { PagesLayout } from './types';
 import { checkValidationErrors } from './util';
 import { ValidatorService } from './validator.service';
-import { ELLIPSIS_MARKER } from './constants';
+import { SEGMENTS_DELIMITER } from './constants';
 import { FolioLayoutBuilderService } from './folio-layout-builder.service';
 
 @Directive({ selector: '[button-prev]' })
@@ -41,14 +41,14 @@ export class ButtonEllipsisDirective {}
         </ng-container>
       </li>
       <ng-container *ngFor="let item of pages">
-        <li class="pagination__item" *ngIf="item !== ELLIPSIS_MARKER">
+        <li class="pagination__item" *ngIf="item !== DELIMITER">
           <ng-container
             [ngTemplateOutlet]="customPageTemplate || defaultPageTemplate"
             [ngTemplateOutletContext]="{ $implicit: item, active: isActive(item) }"
           >
           </ng-container>
         </li>
-        <li class="pagination__item" *ngIf="item === ELLIPSIS_MARKER">
+        <li class="pagination__item" *ngIf="item === DELIMITER">
           <ng-container [ngTemplateOutlet]="customEllipsisTemplate || defaultEllipsisTemplate"></ng-container>
         </li>
       </ng-container>
@@ -110,7 +110,7 @@ export class NgxFolioComponent implements OnChanges {
 
   pages: PagesLayout = [];
 
-  readonly ELLIPSIS_MARKER = ELLIPSIS_MARKER;
+  readonly DELIMITER = SEGMENTS_DELIMITER;
 
   constructor(
     private readonly validator: ValidatorService,
