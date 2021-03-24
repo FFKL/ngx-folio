@@ -98,16 +98,17 @@ class BuildTask {
 
   private populateCursorSegment(referencePage: number, before: number[], after: number[]): number[] {
     const result = [referencePage];
+    const beforeCopy = [...before];
+    const afterCopy = [...after];
 
-    let i = result.length;
-    while ((before.length || after.length) && i < this.segmentsSizes.cursor) {
-      if (before.length) {
-        result.unshift(before.pop() as number);
-        i += 1;
+    while ((beforeCopy.length || afterCopy.length) && result.length < this.segmentsSizes.cursor) {
+      const lastItem = beforeCopy.pop();
+      const firstItem = afterCopy.shift();
+      if (lastItem) {
+        result.unshift(lastItem);
       }
-      if (i < this.segmentsSizes.cursor && after.length) {
-        result.push(after.shift() as number);
-        i += 1;
+      if (result.length < this.segmentsSizes.cursor && firstItem) {
+        result.push(firstItem);
       }
     }
 
