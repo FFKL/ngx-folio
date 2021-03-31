@@ -32,8 +32,12 @@ export class ButtonEllipsisDirective {}
   selector: 'ngx-folio',
   styleUrls: ['./ngx-folio.component.scss'],
   providers: [ValidatorService],
+  encapsulation: ViewEncapsulation.None,
+  host: {
+    '[class.ngx-folio]': 'true'
+  },
   template: `
-    <ul class="ngx-folio">
+    <ul class="ngx-folio__list">
       <li class="ngx-folio__item">
         <ng-container
           [ngTemplateOutlet]="customPrevTemplate || defaultPrevTemplate"
