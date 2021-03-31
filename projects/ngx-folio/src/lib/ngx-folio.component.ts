@@ -8,6 +8,7 @@ import {
   Output,
   SimpleChanges,
   TemplateRef,
+  ViewEncapsulation,
 } from '@angular/core';
 import { PagesLayout } from './types';
 import { checkValidationErrors } from './util';
@@ -32,8 +33,8 @@ export class ButtonEllipsisDirective {}
   styleUrls: ['./ngx-folio.component.scss'],
   providers: [ValidatorService],
   template: `
-    <ul class="pagination">
-      <li class="pagination__item">
+    <ul class="ngx-folio">
+      <li class="ngx-folio__item">
         <ng-container
           [ngTemplateOutlet]="customPrevTemplate || defaultPrevTemplate"
           [ngTemplateOutletContext]="{ $implicit: getPrevPage(), disabled: isDisabledPrev() }"
@@ -41,18 +42,18 @@ export class ButtonEllipsisDirective {}
         </ng-container>
       </li>
       <ng-container *ngFor="let item of pages">
-        <li class="pagination__item" *ngIf="item !== DELIMITER">
+        <li class="ngx-folio__item" *ngIf="item !== DELIMITER">
           <ng-container
             [ngTemplateOutlet]="customPageTemplate || defaultPageTemplate"
             [ngTemplateOutletContext]="{ $implicit: item, active: isActive(item) }"
           >
           </ng-container>
         </li>
-        <li class="pagination__item" *ngIf="item === DELIMITER">
+        <li class="ngx-folio__item" *ngIf="item === DELIMITER">
           <ng-container [ngTemplateOutlet]="customEllipsisTemplate || defaultEllipsisTemplate"></ng-container>
         </li>
       </ng-container>
-      <li class="pagination__item">
+      <li class="ngx-folio__item">
         <ng-container
           [ngTemplateOutlet]="customNextTemplate || defaultNextTemplate"
           [ngTemplateOutletContext]="{ $implicit: getNextPage(), disabled: isDisabledNext() }"
@@ -62,25 +63,25 @@ export class ButtonEllipsisDirective {}
     </ul>
     <ng-template #defaultPrevTemplate let-disabled="disabled">
       <button
-        class="pagination__default-button pagination__direction"
+        class="ngx-folio__default-button ngx-folio__direction"
         [disabled]="disabled"
         (click)="pickPage(getPrevPage())"
       >
-        {{ '<' }}
+        «
       </button>
     </ng-template>
     <ng-template #defaultNextTemplate let-disabled="disabled">
       <button
-        class="pagination__default-button pagination__direction"
+        class="ngx-folio__default-button ngx-folio__direction"
         [disabled]="disabled"
         (click)="pickPage(getNextPage())"
       >
-        {{ '>' }}
+        »
       </button>
     </ng-template>
     <ng-template #defaultPageTemplate let-page let-active="active">
       <button
-        class="pagination__default-button pagination__default-button_page"
+        class="ngx-folio__default-button ngx-folio__default-button_page"
         [disabled]="active"
         (click)="pickPage(page)"
       >
@@ -88,7 +89,7 @@ export class ButtonEllipsisDirective {}
       </button>
     </ng-template>
     <ng-template #defaultEllipsisTemplate>
-      <button class="pagination__default-button" disabled>...</button>
+      <button class="ngx-folio__default-button ngx-folio__ellipsis" disabled>...</button>
     </ng-template>
   `,
 })
