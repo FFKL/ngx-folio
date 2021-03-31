@@ -38,6 +38,33 @@
      start            cursor              end
 ```
 
+### Custom styling
+
+It's easy to override necessary styles:
+
+1. Add custom class to the `ngx-folio` element.
+
+```angular2html
+
+<ngx-folio class="custom-style" [collectionSize]="100" [pageSize]="10"></ngx-folio>
+```
+
+2. Use `::ng-deep` in a specific component or just override property in a global stylesheet file.
+
+```scss
+// my-cmp.component stylesheet
+::ng-deep {
+  .custom-style .ngx-folio__default-button_page {
+    background-color: #ffa400;
+  }
+}
+
+// global stylesheet
+.custom-style .ngx-folio__default-button_page {
+  background-color: #ffa400;
+}
+```
+
 ## Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
