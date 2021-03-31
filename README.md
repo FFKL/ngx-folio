@@ -44,7 +44,7 @@ It's easy to override necessary styles:
 
 1. Add custom class to the `ngx-folio` element.
 
-```angular2html
+```html
 
 <ngx-folio class="custom-style" [collectionSize]="100" [pageSize]="10"></ngx-folio>
 ```
